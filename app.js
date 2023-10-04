@@ -1,18 +1,34 @@
 //const config = require('config');
 const express = require('express');
 const mongoose = require('mongoose');
-//mongoose.connect(process.env.MONGODB_URI || config.connectionString);
-//mongoose.connect(process.env.MONGODB_URI);
+const bodyParser = require('body-parser');
+const userRouter = require('./routes/users');
+const cardRouter = require('./routes/cards');
+const createUser = require('./controllers/users');
+//const NotFoundError = require('./utils/errors/NotFoundError');
 
-const { PORT = 3000, BASE_PATH } = process.env;
+const { PORT = 3000, MONGO_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 const app = express();
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 // подключаемся к серверу mongo
-mongoose.connect('mongodb://localhost:27017/mestodb', {
-  //useNewUrlParser: true,
-  //useCreateIndex: true,
-  //  useFindAndModify: false
-});
+mongoose.connect(MONGO_URL)
+  .then(() => console.log('База данных подключена'))
+  .catch((err) => console.log('Ошибка подключения к базе данных!', err));
+
+mongoose.set({ runValidators: true });
+
+//app.post('/users', createUser);
+
+app.use('/', userRouter);
+app.use('/', cardRouter);
+
+//  app.all('/*', (req, res, next) => {
+//    next(new NotFoundError('Страница не существует'));
+//  });
+
 
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
