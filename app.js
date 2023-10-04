@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
-const createUser = require('./controllers/users');
+//const createUser = require('./controllers/users');
 //const NotFoundError = require('./utils/errors/NotFoundError');
 
 const { PORT = 3000, MONGO_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
@@ -20,7 +20,14 @@ mongoose.connect(MONGO_URL)
 
 mongoose.set({ runValidators: true });
 
-//app.post('/users', createUser);
+app.use((req, res, next) => {
+  req.user = {
+    _id: '651dd4cbec0f094f181563d9',
+  };
+  
+  next();
+});
+
 
 app.use('/', userRouter);
 app.use('/', cardRouter);
