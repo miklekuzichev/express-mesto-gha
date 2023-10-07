@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const cardRouter = require('./routes/cards');
 const userRouter = require('./routes/users');
@@ -22,6 +23,8 @@ mongoose.connect(MONGO_URL)
   .catch((err) => console.log('Ошибка подключения к базе данных!', err));
 
 mongoose.set({ runValidators: true });
+
+app.use(helmet());
 
 //
 // Временное решение авторизации
