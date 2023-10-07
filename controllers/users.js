@@ -37,7 +37,6 @@ module.exports.getUserById = (req, res) => {
       res.status(STATUS_CODES.OK).send({ data: user });
     })
     .catch((err) => {
-      console.log(err.name);
       if (err.name === 'DocumentNotFoundError') {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       } else if (err.name === 'CastError') {
