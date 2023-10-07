@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cardRouter = require('./routes/cards');
 const userRouter = require('./routes/users');
+const { STATUS_CODES } = require('./utils/constants');
 
 //
 // Создаем сервер
@@ -37,6 +38,13 @@ app.use((req, res, next) => {
 //
 app.use('/', userRouter);
 app.use('/', cardRouter);
+
+//
+// При переходе по несуществюущему пути
+//
+app.all('/*', (req, res, next) => {
+  next(res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Страница не найдена' }));
+});
 
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает

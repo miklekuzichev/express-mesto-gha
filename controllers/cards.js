@@ -39,8 +39,12 @@ module.exports.deleteCard = (req, res) => {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
       }
     })
-    .catch(() => {
-      res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
+      }
     });
 };
 
