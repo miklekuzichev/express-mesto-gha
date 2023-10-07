@@ -37,9 +37,9 @@ module.exports.deleteCard = (req, res) => {
       res.status(STATUS_CODES.OK).send(card);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'DocumentNotFoundError') {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
-      } else if (err.name === 'ValidationError') {
+      } else if (err.name === 'CastError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
       } else {
         res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
@@ -61,9 +61,9 @@ module.exports.likeCard = (req, res) => {
       res.status(STATUS_CODES.OK).send(card);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'DocumentNotFoundError') {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
-      } else if (err.name === 'ValidationError') {
+      } else if (err.name === 'CastError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные для постановки лайка' });
       } else {
         res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
@@ -85,9 +85,9 @@ module.exports.dislikeCard = (req, res) => {
       res.status(STATUS_CODES.OK).send(card);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'DocumentNotFoundError') {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
-      } else if (err.name === 'ValidationError') {
+      } else if (err.name === 'CastError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные для снятия лайка' });
       } else {
         res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
