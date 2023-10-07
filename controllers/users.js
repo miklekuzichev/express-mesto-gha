@@ -39,8 +39,12 @@ module.exports.getUserById = (req, res) => {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       }
     })
-    .catch(() => {
-      res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
+      }
     });
 };
 
