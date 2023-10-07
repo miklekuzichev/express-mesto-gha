@@ -32,12 +32,12 @@ module.exports.createUser = (req, res) => {
 //
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .orFail(new Error('NotValidId'))
+    .orFail()
     .then((user) => {
       res.status(STATUS_CODES.OK).send({ data: user });
     })
     .catch((err) => {
-      if (err.message === 'NotValidId') {
+      if (err.name === 'CastError') {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       } else {
         res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
@@ -52,15 +52,14 @@ module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
 
   return User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
+    .orFail()
     .then((user) => {
-      if (user) {
-        res.status(STATUS_CODES.OK).send(user);
-      } else {
-        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' });
-      }
+      res.status(STATUS_CODES.OK).send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
+        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' });
+      } else if (err.name === 'ValidationError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении аватара' });
       } else {
         res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
@@ -75,15 +74,14 @@ module.exports.updateUserProfile = (req, res) => {
   const { name, about } = req.body;
 
   return User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+    .orFail()
     .then((user) => {
-      if (user) {
-        res.status(STATUS_CODES.OK).send(user);
-      } else {
-        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' });
-      }
+      res.status(STATUS_CODES.OK).send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
+        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' });
+      } else if (err.name === 'ValidationError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля' });
       } else {
         res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
