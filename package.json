@@ -21,6 +21,7 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
     "config": "^3.3.9",
     "editorconfig": "^2.0.0",
     "eslint-config-airbnb-base": "^15.0.0",
