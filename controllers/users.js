@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+
 const { STATUS_CODES } = require('../utils/constants');
 
 //
@@ -37,6 +39,20 @@ module.exports.createUser = (req, res) => {
         res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
       }
     });
+};
+
+//
+// Функция регистрации
+//
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, '74c996b93e60225322df59ea8742655c655b6a63562e9181812f2855aafaa2ede', { expiresIn: '7d' }); // 7 days
+      res.send({ _id: token });
+    })
+    .catch((next));
 };
 
 //
