@@ -15,10 +15,21 @@ module.exports.getUsers = (req, res) => {
 // Функция создания юзера
 //
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { name, about, avatar, email, password } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => res.status(STATUS_CODES.CREATED).send({ data: user }))
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then(() => res.status(STATUS_CODES.CREATED)
+      .send(
+        {
+          data: {
+            name, about, avatar, email,
+          },
+        },
+      ))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
