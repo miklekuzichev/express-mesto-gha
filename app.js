@@ -1,9 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const auth = require('./middlewares/auth');
 const bodyParser = require('body-parser');
 const cardRouter = require('./routes/cards');
 const userRouter = require('./routes/users');
+
+const login = require('./controllers/users');
+const createUser = require('./controllers/users');
+
 const { STATUS_CODES } = require('./utils/constants');
 
 //
@@ -39,6 +44,12 @@ app.use((req, res, next) => {
 //
 // Монтируем мидлверы
 //
+
+app.post('/signin', login);
+app.post('/signup', createUser);
+
+app.use(auth);
+
 app.use('/', userRouter);
 app.use('/', cardRouter);
 
