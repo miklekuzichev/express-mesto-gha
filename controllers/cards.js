@@ -48,7 +48,7 @@ module.exports.deleteCard = (req, res) => {
 };
 
 //
-// Функция постановки лайка
+// Контроллер постановки лайка
 //
 module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
@@ -72,7 +72,7 @@ module.exports.likeCard = (req, res) => {
 };
 
 //
-// Функция удаления лайка
+// Контроллер удаления лайка
 //
 module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(

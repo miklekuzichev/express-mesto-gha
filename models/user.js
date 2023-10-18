@@ -38,12 +38,13 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    select: false,
+    select: false, // по умолчанию хеш пароля пользователя не будет возвращаться из базы
   },
 }, { versionKey: false });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email })
+    .select('+password') // здесь в объекте user будет хеш пароля
     .then((user) => {
       if (!user) {
         return Promise.reject(new Error('Неправильные почта или пароль'));

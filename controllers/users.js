@@ -14,7 +14,7 @@ module.exports.getUsers = (req, res) => {
 };
 
 //
-// Функция создания юзера
+// Контроллер создания юзера
 //
 module.exports.createUser = (req, res) => {
   const { name, about, avatar, email, password } = req.body;
@@ -42,7 +42,7 @@ module.exports.createUser = (req, res) => {
 };
 
 //
-// Функция регистрации
+// Контроллер регистрации
 //
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
@@ -56,7 +56,27 @@ module.exports.login = (req, res, next) => {
 };
 
 //
-// Функция получения юзера по айди
+// Контроллер получения информации о пользователе
+//
+module.exports.findUser = (req, res) => {
+  User.findById(req.user._id)
+    .orFail()
+    .then((user) => {
+      res.status(STATUS_CODES.OK).send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'DocumentNotFoundError') {
+        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь не найден' });
+      } else if (err.name === 'CastError') {
+        res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
+      }
+    });
+};
+
+//
+// Контроллер получения юзера по айди
 //
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
@@ -76,7 +96,7 @@ module.exports.getUserById = (req, res) => {
 };
 
 //
-// Функция обновления аватара юзера
+// Контроллер обновления аватара юзера
 //
 module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
@@ -98,7 +118,7 @@ module.exports.updateUserAvatar = (req, res) => {
 };
 
 //
-// Функция обновления информации юзера
+// Контроллер обновления информации юзера
 //
 module.exports.updateUserProfile = (req, res) => {
   const { name, about } = req.body;
