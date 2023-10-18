@@ -1,13 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const auth = require('./middlewares/auth');
 const bodyParser = require('body-parser');
 const cardRouter = require('./routes/cards');
 const userRouter = require('./routes/users');
-
 const login = require('./controllers/users');
 const createUser = require('./controllers/users');
+const auth = require('./middlewares/auth');
 
 const { STATUS_CODES } = require('./utils/constants');
 
@@ -35,8 +34,12 @@ app.use(helmet());
 // Монтируем мидлверы
 //
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', function(req, res){
+  login
+});
+app.post('/signup', function(req, res){
+  createUser
+});
 
 app.use(auth);
 
