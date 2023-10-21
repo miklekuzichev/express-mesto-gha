@@ -30,6 +30,32 @@ module.exports.createCard = (req, res, next) => {
 // Функция удаления карточки
 //
 module.exports.deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId)
+  .then((card) => {
+    if (!card) {
+      res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Карточка не найдена' });
+    }
+    if (card.owner.toString() !== req.user._id) {
+      res.status(STATUS_CODES.FORBIDDEN_ERROR).send({ message: 'Нет прав на удаление карточки' });
+    }
+    Card.findByIdAndRemove(req.params.cardId)
+      .then(() => res.send({ message: 'Карточка удалена' }))
+      .catch((err) => {
+        if (err.name === 'DocumentNotFoundError') {
+          res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
+        } else if (err.name === 'CastError') {
+          res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
+        }
+        return next(err);
+      });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return next(res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Введены некорректные данные' }))
+      }
+      return next(err);
+    });
+/*
   Card.findByIdAndRemove(req.params.cardId)
     .orFail()
     .then((card) => {
@@ -43,6 +69,7 @@ module.exports.deleteCard = (req, res, next) => {
       }
       return next(err);
     });
+*/
 };
 
 //
