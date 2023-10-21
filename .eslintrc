@@ -5,6 +5,7 @@
     "func-names": "off",
     "no-console": "off",
     "semi": 0,
-    "comma-dangle": [0, "always-multiline"]
+    "comma-dangle": [0, "always-multiline"],
+    "eslint-disable-next-line": "consistent-return"
   }
 }
