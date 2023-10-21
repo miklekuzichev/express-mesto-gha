@@ -4,16 +4,16 @@ const { STATUS_CODES } = require('../utils/constants');
 //
 // Функция получения карточек
 //
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.status(STATUS_CODES.OK).send({ cards }))
-    .catch(() => res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' }));
+    .catch(next);
 };
 
 //
 // Функция создания карточек
 //
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   return Card.create({ name, link, owner: req.user._id })
@@ -21,16 +21,15 @@ module.exports.createCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Введены некорректные данные при создании карточки' });
-      } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
       }
+      return next(err);
     });
 };
 
 //
 // Функция удаления карточки
 //
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .orFail()
     .then((card) => {
@@ -41,16 +40,15 @@ module.exports.deleteCard = (req, res) => {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
       } else if (err.name === 'CastError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
       }
+      return next(err);
     });
 };
 
 //
 // Контроллер постановки лайка
 //
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -65,16 +63,15 @@ module.exports.likeCard = (req, res) => {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
       } else if (err.name === 'CastError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные для постановки лайка' });
-      } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
       }
+      return next(err);
     });
 };
 
 //
 // Контроллер удаления лайка
 //
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
@@ -89,8 +86,7 @@ module.exports.dislikeCard = (req, res) => {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
       } else if (err.name === 'CastError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные для снятия лайка' });
-      } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
       }
+      return next(err);
     });
 };

@@ -2,11 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const cardRouter = require('./routes/cards');
 const userRouter = require('./routes/users');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-
+const { signinValidate, signupValidate } = require('./middlewares/validation');
 const { STATUS_CODES } = require('./utils/constants');
 
 //
@@ -33,8 +34,8 @@ app.use(helmet());
 // Монтируем мидлверы
 //
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', signinValidate, login);
+app.post('/signup', signupValidate, createUser);
 
 app.use(auth);
 
@@ -46,6 +47,23 @@ app.use('/', cardRouter);
 //
 app.all('/*', (req, res, next) => {
   next(res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Страница не найдена' }));
+});
+
+app.use(errors());
+
+//
+// Обработка ошибки сервера
+//
+app.use((err, req, res, next) => {
+  const {
+    statusCode = 500,
+    message,
+  } = err;
+  res.status(statusCode)
+    .send({
+      message: statusCode === 500 ? 'Ошибка сервера' : message,
+    });
+  next();
 });
 
 app.listen(PORT, () => {

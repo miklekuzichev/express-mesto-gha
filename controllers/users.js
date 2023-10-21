@@ -7,16 +7,16 @@ const { STATUS_CODES } = require('../utils/constants');
 //
 // Функция получения юзеров
 //
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(STATUS_CODES.OK).send({ users }))
-    .catch(() => res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' }));
+    .catch(next);
 };
 
 //
 // Контроллер создания юзера
 //
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password
   } = req.body;
@@ -36,10 +36,12 @@ module.exports.createUser = (req, res) => {
       ))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
-      } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
+        return next(res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' }));
       }
+      if (err.code === 11000) {
+        return next(res.status(STATUS_CODES.CONFLICT_ERROR).send({ message: 'Пользователь с таким email уже существует!' }));
+      }
+      return next(err);
     });
 };
 
@@ -60,7 +62,7 @@ module.exports.login = (req, res, next) => {
 //
 // Контроллер получения информации о пользователе
 //
-module.exports.findUser = (req, res) => {
+module.exports.findUser = (req, res, next) => {
   User.findById(req.user._id)
     .orFail()
     .then((user) => {
@@ -71,36 +73,34 @@ module.exports.findUser = (req, res) => {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь не найден' });
       } else if (err.name === 'CastError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
       }
+      return next(err);
     });
 };
 
 //
 // Контроллер получения юзера по айди
 //
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail()
     .then((user) => {
-      res.status(STATUS_CODES.OK).send({ data: user });
+      res.status(STATUS_CODES.OK).send({ data: user }); // возвращаем пользователя, если он там есть
     })
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       } else if (err.name === 'CastError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
       }
+      return next(err);
     });
 };
 
 //
 // Контроллер обновления аватара юзера
 //
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   return User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
@@ -113,16 +113,15 @@ module.exports.updateUserAvatar = (req, res) => {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' });
       } else if (err.name === 'ValidationError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении аватара' });
-      } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
       }
+      return next(err);
     });
 };
 
 //
 // Контроллер обновления информации юзера
 //
-module.exports.updateUserProfile = (req, res) => {
+module.exports.updateUserProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   return User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
@@ -135,8 +134,7 @@ module.exports.updateUserProfile = (req, res) => {
         res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' });
       } else if (err.name === 'ValidationError') {
         res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля' });
-      } else {
-        res.status(STATUS_CODES.SERVER_ERROR).send({ message: 'Ошибка сервера' });
       }
+      return next(err);
     });
 };
