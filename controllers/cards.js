@@ -41,14 +41,13 @@ module.exports.deleteCard = (req, res, next) => {
     if (card.owner.toString() !== req.user._id) {
       throw new ForbiddenError('Нет прав на удаление карточки');
     }
-    //Card.findByIdAndRemove(req.params.cardId)
     Card.deleteOne(card)
       .then(() => res.send({ message: 'Карточка удалена' }))
       .catch((err) => {
         if (err.name === 'DocumentNotFoundError') {
-          res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
+          return next(new NotFoundError('Передан несуществующий _id карточки'));
         } else if (err.name === 'CastError') {
-          res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Введены некорректные данные' });
+          return next(new BadRequestError('Введены некорректные данные'));
         }
         return next(err);
       });

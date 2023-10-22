@@ -4,7 +4,7 @@ const User = require('../models/user');
 const NotFoundError = require('../utils/errors/NotFoundError');
 const BadRequestError = require('../utils/errors/BadRequestError');
 const ConflictError = require('../utils/errors/ConflictError');
-
+const UnauthorizedError = require('../utils/errors/UnauthorizedError');
 const { STATUS_CODES } = require('../utils/constants');
 
 //
@@ -61,7 +61,7 @@ module.exports.login = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'Error') {
-        res.status(STATUS_CODES.UNAUTHORIZED_ERROR).send({ message: err.message });
+        return next(new UnauthorizedError('Необходима авторизация!'));
       }
       return next(err);
     });

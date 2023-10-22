@@ -10,7 +10,9 @@ const auth = require('./middlewares/auth');
 const { signinValidate, signupValidate } = require('./middlewares/validation');
 const { STATUS_CODES } = require('./utils/constants');
 const errorHandler = require('./middlewares/errorHandler');
-const { rateLimit } = require('express-rate-limit')
+const { rateLimit } = require('express-rate-limit');
+const NotFoundError = require('./utils/errors/NotFoundError');
+
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 минут
 	limit: 100, // Ограничение 100 запросов на IP за 15 минутное окно
@@ -37,7 +39,7 @@ mongoose.connect(MONGO_URL)
 mongoose.set({ runValidators: true });
 
 app.use(helmet());
-//app.use(limiter);
+app.use(limiter);
 //
 // Монтируем мидлверы
 //
@@ -54,7 +56,7 @@ app.use('/', cardRouter);
 // При переходе по несуществюущему пути
 //
 app.all('/*', (req, res, next) => {
-  next(res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Страница не найдена' }));
+  next(new NotFoundError('Страница не найдена'));
 });
 
 app.use(errors());
