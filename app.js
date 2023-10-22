@@ -37,7 +37,7 @@ mongoose.connect(MONGO_URL)
 mongoose.set({ runValidators: true });
 
 app.use(helmet());
-app.use(limiter);
+//app.use(limiter);
 //
 // Монтируем мидлверы
 //
@@ -63,3 +63,8 @@ app.use(errors());
 // Обработка ошибки сервера
 //
 app.use(errorHandler);
+
+app.listen(PORT, () => {
+  // Если всё работает, консоль покажет, какой порт приложение слушает
+  console.log(`App listening on port ${PORT}`)
+});
