@@ -9,6 +9,14 @@ const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { signinValidate, signupValidate } = require('./middlewares/validation');
 const { STATUS_CODES } = require('./utils/constants');
+const errorHandler = require('./middlewares/errorHandler');
+const { rateLimit } = require('express-rate-limit')
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 минут
+	limit: 100, // Ограничение 100 запросов на IP за 15 минутное окно
+	standardHeaders: 'draft-7',
+	legacyHeaders: false, // Выключаем `X-RateLimit-*` заголовки
+})
 
 //
 // Создаем сервер
@@ -29,7 +37,7 @@ mongoose.connect(MONGO_URL)
 mongoose.set({ runValidators: true });
 
 app.use(helmet());
-
+app.use(limiter);
 //
 // Монтируем мидлверы
 //
@@ -54,19 +62,4 @@ app.use(errors());
 //
 // Обработка ошибки сервера
 //
-app.use((err, req, res, next) => {
-  const {
-    statusCode = 500,
-    message,
-  } = err;
-  res.status(statusCode)
-    .send({
-      message: statusCode === 500 ? 'Ошибка сервера' : message,
-    });
-  next();
-});
-
-app.listen(PORT, () => {
-  // Если всё работает, консоль покажет, какой порт приложение слушает
-  console.log(`App listening on port ${PORT}`)
-});
+app.use(errorHandler);

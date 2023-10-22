@@ -37,14 +37,16 @@ module.exports.deleteCard = (req, res, next) => {
     }
     if (card.owner.toString() !== req.user._id) {
       res.status(STATUS_CODES.FORBIDDEN_ERROR).send({ message: 'Нет прав на удаление карточки' });
+      return;
     }
-    Card.findByIdAndRemove(req.params.cardId)
+    //Card.findByIdAndRemove(req.params.cardId)
+    Card.deleteOne(card)
       .then(() => res.send({ message: 'Карточка удалена' }))
       .catch((err) => {
         if (err.name === 'DocumentNotFoundError') {
           res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
         } else if (err.name === 'CastError') {
-          res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
+          res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Введены некорректные данные' });
         }
         return next(err);
       });
@@ -55,21 +57,6 @@ module.exports.deleteCard = (req, res, next) => {
       }
       return next(err);
     });
-/*
-  Card.findByIdAndRemove(req.params.cardId)
-    .orFail()
-    .then((card) => {
-      res.status(STATUS_CODES.OK).send(card);
-    })
-    .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
-      } else if (err.name === 'CastError') {
-        res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
-      }
-      return next(err);
-    });
-*/
 };
 
 //

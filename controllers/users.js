@@ -56,7 +56,6 @@ module.exports.login = (req, res, next) => {
       const token = jwt.sign({ _id: user._id }, '74c996b93e60225322df59ea8742655c655b6a63562e9181812f2855aafaa2ede', { expiresIn: '7d' }); // 7 days
       res.send({ _id: token });
     })
-    //.catch((next));
     .catch((err) => {
       if (err.name === 'Error') {
         res.status(STATUS_CODES.UNAUTHORIZED_ERROR).send({ message: err.message });
