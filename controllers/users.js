@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const NotFoundError = require('../utils/errors/NotFoundError');
+const BadRequestError = require('../utils/errors/BadRequestError');
+const ConflictError = require('../utils/errors/ConflictError');
 
 const { STATUS_CODES } = require('../utils/constants');
 
@@ -36,10 +39,10 @@ module.exports.createUser = (req, res, next) => {
       ))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return next(res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' }));
+        return next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       }
       if (err.code === 11000) {
-        return next(res.status(STATUS_CODES.CONFLICT_ERROR).send({ message: 'Пользователь с таким email уже существует!' }));
+        return next(new ConflictError('Пользователь с таким email уже существует!'));
       }
       return next(err);
     });
@@ -75,9 +78,9 @@ module.exports.findUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
-        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь не найден' });
+        return next(new NotFoundError('Пользователь не найден'));
       } else if (err.name === 'CastError') {
-        res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
+        return next(new BadRequestError('Переданы некорректные данные'));
       }
       return next(err);
     });
@@ -94,9 +97,9 @@ module.exports.getUserById = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
-        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
+        return next(new NotFoundError('Пользователь по указанному _id не найден'));
       } else if (err.name === 'CastError') {
-        res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные' });
+        return next(new BadRequestError('Переданы некорректные данные'));
       }
       return next(err);
     });
@@ -115,9 +118,9 @@ module.exports.updateUserAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' });
+        return next(new NotFoundError('Пользователь с указанным _id не найден'));
       } else if (err.name === 'ValidationError') {
-        res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении аватара' });
+        return next(new BadRequestError('Переданы некорректные данные при обновлении аватара'));
       }
       return next(err);
     });
@@ -136,9 +139,9 @@ module.exports.updateUserProfile = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(STATUS_CODES.NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' });
+        return next(new NotFoundError('Пользователь с указанным _id не найден'));
       } else if (err.name === 'ValidationError') {
-        res.status(STATUS_CODES.ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+        return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
       }
       return next(err);
     });
