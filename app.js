@@ -8,10 +8,10 @@ const userRouter = require('./routes/users');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { signinValidate, signupValidate } = require('./middlewares/validation');
-const { STATUS_CODES } = require('./utils/constants');
 const errorHandler = require('./middlewares/errorHandler');
 const { rateLimit } = require('express-rate-limit');
 const NotFoundError = require('./utils/errors/NotFoundError');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 минут
@@ -40,6 +40,7 @@ mongoose.set({ runValidators: true });
 
 app.use(helmet());
 app.use(limiter);
+app.use(requestLogger); // подключаем логгер запросов
 //
 // Монтируем мидлверы
 //
@@ -59,6 +60,7 @@ app.all('/*', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
+app.use(errorLogger); // подключаем логгер ошибок
 app.use(errors());
 
 //
