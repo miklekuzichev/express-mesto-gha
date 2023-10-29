@@ -12,6 +12,7 @@ const errorHandler = require('./middlewares/errorHandler');
 const { rateLimit } = require('express-rate-limit');
 const NotFoundError = require('./utils/errors/NotFoundError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const cors = require('./middlewares/cors');
 
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 минут
@@ -30,6 +31,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 //
+// Обрабатываем заголовки CORS
+//
+app.use(cors);
+
+//
 // Подключаемся к серверу mongo
 //
 mongoose.connect(MONGO_URL)
@@ -39,6 +45,16 @@ mongoose.connect(MONGO_URL)
 mongoose.set({ runValidators: true });
 
 app.use(helmet());
+
+//
+// Тестируем автоматический рестарт сервера
+//
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
 app.use(limiter);
 app.use(requestLogger); // подключаем логгер запросов
 //
